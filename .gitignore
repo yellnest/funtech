@@ -1,0 +1,8 @@
+.idea/
+.vscode/
+
+__pycache__/
+
+configdb.sqlite3
+db.sqlite3
+local.py
