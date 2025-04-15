@@ -11,6 +11,11 @@ services:
       - backend-network
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U backend" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   redis:
     image: redis:6
@@ -48,7 +53,9 @@ services:
     build:
       context: ./funtech_project
     container_name: celery_worker
-    command: bash -c "while ! redis-cli -h redis ping; do sleep 2; done; celery -A backend worker --loglevel=info"
+    command: >
+      bash -c "python -c 'import time, redis; r = redis.Redis(host=\"redis\", port=6379); [time.sleep(2) for _ in range(10) if not r.ping()]' && celery -A backend worker --loglevel=info"
+
     environment:
       DB_NAME: backend
       DB_USER: backend
